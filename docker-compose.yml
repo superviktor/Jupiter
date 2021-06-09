@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+ mssql-database:
+  container_name: jupiter-mssql-server
+  image: "mcr.microsoft.com/mssql/server"
+  ports: 
+   - "1433:1433"
+  environment:
+   SA_PASSWORD: "jupiter-pwd"
+   ACCEPT_EULA: "Y"
+  restart: always
