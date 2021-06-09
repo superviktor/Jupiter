@@ -1,8 +1,10 @@
 ﻿using System.IO;
+using System.Text;
 using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 
 namespace Jupiter.Api.Controllers
 {
@@ -44,6 +46,19 @@ namespace Jupiter.Api.Controllers
             blobClient.Upload(stream, true);
             var blobs = containerClient.GetBlobsAsync();
             return Ok(blobs);
+        }
+
+        [HttpPost("/message-broker")]
+        public IActionResult PostToMessageBroker()
+        {
+            var message = "message";
+            var factory = new ConnectionFactory { UserName = "jupiter", Password = "jupiter-pwd", HostName = "localhost" };
+            using var connection = factory.CreateConnection();
+            using var channel = connection.CreateModel();
+            channel.QueueDeclare(queue: "queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
+            var body = Encoding.UTF8.GetBytes(message);
+            channel.BasicPublish(exchange: "", routingKey: "queue", basicProperties: null, body: body);
+            return Ok(message);
         }
     }
 }

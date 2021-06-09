@@ -17,3 +17,13 @@ services:
     - "10000:10000"
     - "10001:10001"
   restart: always
+ message-broker-rabbitmq:
+  image: masstransit/rabbitmq
+  container_name: jupiter_rabbitmq
+  environment:
+    RABBITMQ_DEFAULT_USER: "jupiter"
+    RABBITMQ_DEFAULT_PASS: "jupiter-pwd"
+  ports:
+    - "5672:5672"
+    - "15672:15672"
+  restart: always
