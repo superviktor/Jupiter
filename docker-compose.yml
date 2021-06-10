@@ -27,3 +27,13 @@ services:
     - "5672:5672"
     - "15672:15672"
   restart: always
+ #nosql-cosmosdb:
+   #image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
+   #container_name: jupiter_cosmosdb
+   #restart: always
+   #environment:
+    #AZURE_COSMOS_EMULATOR_PARTITION_COUNT: 10
+    #AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE: 10
+    #AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE: "${IPADDR}"
+   #ports:
+    #- "8081:8081"
