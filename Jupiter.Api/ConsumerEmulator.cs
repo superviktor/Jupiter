@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,10 +11,22 @@ namespace Jupiter.Api
 {
     public class ConsumerEmulator : BackgroundService
     {
+        private readonly IConfiguration _configuration;
+
+        public ConsumerEmulator(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             var factory = new ConnectionFactory
-                {UserName = "jupiter", Password = "jupiter-pwd", HostName = "localhost"};
+            {
+                UserName = _configuration["Dependencies:RabbitMq:Username"],
+                Password = _configuration["Dependencies:RabbitMq:Password"],
+                HostName = _configuration["Dependencies:RabbitMq:Host"],
+                Port = int.Parse(_configuration["Dependencies:RabbitMq:Port"])
+            };
             var connection = factory.CreateConnection();
             var channel = connection.CreateModel();
             channel.QueueDeclare(queue: "queue", durable: false, exclusive: false, autoDelete: false, arguments: null);

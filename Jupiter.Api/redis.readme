@@ -1,0 +1,10 @@
+﻿#go inside container 
+docker exec -it jupiter_redis sh
+#run cli
+redis-cli
+#authenticate
+auth jupiter-pwd
+#set key
+SET key1 hello
+#get key value
+MGET key1

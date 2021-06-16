@@ -9,6 +9,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using ServiceStack.Redis;
 
 namespace Jupiter.Api.Controllers
 {
@@ -26,7 +27,7 @@ namespace Jupiter.Api.Controllers
             this._configuration = configuration;
         }
 
-        [HttpGet("/database")]
+        [HttpGet("/mssql")]
         public IActionResult GetFromDb()
         {
             var entities = _context.Entities;
@@ -34,7 +35,7 @@ namespace Jupiter.Api.Controllers
             return Ok(entities);
         }
 
-        [HttpGet("/azure-storage")]
+        [HttpGet("/blob-storage")]
         public IActionResult GetFromAzureStorage()
         {
             var connectionString = _configuration["Dependencies:Azure:Blob"];
@@ -52,11 +53,17 @@ namespace Jupiter.Api.Controllers
             return Ok(blobs);
         }
 
-        [HttpPost("/message-broker")]
+        [HttpGet("/rabbitmq")]
         public IActionResult PostToMessageBroker()
         {
             var message = "message";
-            var factory = new ConnectionFactory { UserName = "jupiter", Password = "jupiter-pwd", HostName = "localhost" };
+            var factory = new ConnectionFactory
+            {
+                UserName = _configuration["Dependencies:RabbitMq:Username"],
+                Password = _configuration["Dependencies:RabbitMq:Password"], 
+                HostName = _configuration["Dependencies:RabbitMq:Host"], 
+                Port = int.Parse(_configuration["Dependencies:RabbitMq:Port"])
+            };
             using var connection = factory.CreateConnection();
             using var channel = connection.CreateModel();
             channel.QueueDeclare(queue: "queue", durable: false, exclusive: false, autoDelete: false, arguments: null);
@@ -104,6 +111,16 @@ namespace Jupiter.Api.Controllers
             await database.Database.DeleteAsync();
 
             return Ok(docs);
+        }
+
+        [HttpGet("/redis")]
+        public IActionResult GetFromRedis()
+        {
+            var manager = new RedisManagerPool($"{_configuration["Dependencies:Redis:Password"]}@{_configuration["Dependencies:Redis:Host"]}");
+            using var client = manager.GetClient();
+            client.Set("key", "value");
+            var value = client.Get<string>("key");
+            return Ok(value);
         }
     }
 }
