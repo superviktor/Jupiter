@@ -1,6 +1,6 @@
 version: "3.9"
 services:
- mssql-database:
+ mssql:
   container_name: jupiter-mssql-server
   image: "mcr.microsoft.com/mssql/server"
   ports: 
@@ -17,9 +17,10 @@ services:
     - "10000:10000"
     - "10001:10001"
   restart: always
- message-broker-rabbitmq:
-  image: masstransit/rabbitmq
+ rabbitmq:
+  image: rabbitmq:3-management
   container_name: jupiter_rabbitmq
+  hostname: rabbitmq
   environment:
     RABBITMQ_DEFAULT_USER: "jupiter"
     RABBITMQ_DEFAULT_PASS: "jupiter-pwd"
@@ -27,7 +28,14 @@ services:
     - "5672:5672"
     - "15672:15672"
   restart: always
- #nosql-cosmosdb:
+ redis:
+  image: redis
+  container_name: jupiter_redis
+  command: redis-server --appendonly yes --requirepass jupiter-pwd
+  ports:
+    - 6379:6379
+  restart: always
+ #cosmosdb:
    #image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator
    #container_name: jupiter_cosmosdb
    #restart: always
